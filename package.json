@@ -1,0 +1,13 @@
+{
+  "name": "com.github.songkyoo.uvviewer",
+  "displayName": "UVViewer",
+  "version": "1.0.0",
+  "author": {
+    "name": "Song, Kyoo",
+    "email": "songkyoo@hotmail.com",
+    "url": "https://github.com/songkyoo/UVViewer"
+  },
+  "unity": "2022.3",
+  "description": "UVViewer is an editor window extension class that allows you to check the mesh's UV in the Unity editor.",
+  "type": "tool"
+}
