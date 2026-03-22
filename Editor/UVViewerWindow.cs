@@ -60,6 +60,11 @@ namespace Macaron.UVViewer.Editor
         private bool _foldoutViewSettings = true;
         private SerializedObject _viewSettingsObject;
 
+        private static GUIStyle s_paddedStyle;
+        private static GUIStyle s_previewLabelStyle;
+        private static GUIStyle s_previewButtonStyle;
+        private static GUIStyle s_gridTextStyle;
+
         #region EditorWindow Messages
         private void Awake()
         {
@@ -198,7 +203,8 @@ namespace Macaron.UVViewer.Editor
                 // 상단 여백.
                 GUILayout.Space(8.0f);
 
-                using (new EditorGUILayout.VerticalScope(new GUIStyle { padding = new RectOffset(14, 0, 0, 0) }))
+                s_paddedStyle ??= new GUIStyle { padding = new RectOffset(14, 0, 0, 0) };
+                using (new EditorGUILayout.VerticalScope(s_paddedStyle))
                 {
                     EditorGUIUtility.labelWidth += 3.0f;
 
@@ -218,7 +224,9 @@ namespace Macaron.UVViewer.Editor
 
         private void OnInspectorUpdate()
         {
-            Repaint();
+            // Undo/redo repaints are handled via Undo.undoRedoPerformed in OnEnable.
+            // Interactive changes (drag, zoom, resize) call Repaint() directly.
+            // No need for unconditional repainting here.
         }
 
         private void OnSelectionChange()
@@ -532,8 +540,12 @@ namespace Macaron.UVViewer.Editor
                 yMax = backgroundRect.yMax + 17.0f
             };
 
-            var previewLabelStyle = new GUIStyle("preLabel");
-            previewLabelStyle.normal.textColor = new Color32(222, 222, 222, 255);
+            if (s_previewLabelStyle == null)
+            {
+                s_previewLabelStyle = new GUIStyle("preLabel");
+                s_previewLabelStyle.normal.textColor = new Color32(222, 222, 222, 255);
+            }
+            var previewLabelStyle = s_previewLabelStyle;
             var labelContent = new GUIContent(_mesh != null ? _mesh.name : string.Empty);
             Vector2 labelSize = previewLabelStyle.CalcSize(labelContent);
             var labelRect = new Rect(resizeHandleBackgroundRect)
@@ -542,7 +554,8 @@ namespace Macaron.UVViewer.Editor
                 xMax = backgroundRect.xMin + 3.0f + labelSize.x
             };
 
-            var previewButtonStyle = new GUIStyle("preButton");
+            s_previewButtonStyle ??= new GUIStyle("preButton");
+            var previewButtonStyle = s_previewButtonStyle;
             var resetButtonContent = new GUIContent(EditorResources.ZoomIcon, "Reset View");
             Vector2 resetButtonSize = previewButtonStyle.CalcSize(resetButtonContent);
             var resetButtonRect = new Rect(resizeHandleBackgroundRect)
@@ -1054,17 +1067,14 @@ namespace Macaron.UVViewer.Editor
 
                 foreach (var textGroup in textGroups)
                 {
-                    var style = new GUIStyle
-                    {
-                        normal = new GUIStyleState { textColor = textGroup.Color },
-                        alignment = TextAnchor.UpperRight
-                    };
+                    s_gridTextStyle ??= new GUIStyle { alignment = TextAnchor.UpperRight };
+                    s_gridTextStyle.normal.textColor = textGroup.Color;
 
                     GridTextInfo[] infos = textGroup.TextInfos;
                     for (int i = 0; i < infos.Length; ++i)
                     {
                         GridTextInfo info = infos[i];
-                        Handles.Label(info.Position + textOffset, info.Text, style);
+                        Handles.Label(info.Position + textOffset, info.Text, s_gridTextStyle);
                     }
                 }
             }
