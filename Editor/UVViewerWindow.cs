@@ -1529,8 +1529,8 @@ namespace Macaron.UVViewer.Editor
             }
 
             string[] materialNames = materials.Select(mat => mat.name).ToArray();
-            int[] materialIds = materials.Select(mat => mat.GetInstanceID()).ToArray();
-            int oldMaterialId = _textureSettings.MaterialId;
+            int[] materialIds = materials.Select(mat => mat.GetEntityId().GetHashCode()).ToArray();
+            int oldMaterialId = _textureSettings.MaterialId.GetHashCode();
 
             if (!materialIds.Contains(oldMaterialId))
             {
@@ -1547,7 +1547,7 @@ namespace Macaron.UVViewer.Editor
                 _textureSettings.MaterialTexture = null;
             }
 
-            Material material = Array.Find(materials, mat => mat.GetInstanceID() == newMaterialId);
+            Material material = Array.Find(materials, mat => mat.GetEntityId().GetHashCode() == newMaterialId);
             Shader shader = material.shader;
 
             var props = Enumerable

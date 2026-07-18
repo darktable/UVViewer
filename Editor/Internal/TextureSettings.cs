@@ -17,7 +17,7 @@ namespace Macaron.UVViewer.Editor.Internal
         private const string _channelFlagKey = _prefsKeyPrefix + "ChannelFlag";
 
         [SerializeField] private TextureSourceType _sourceType;
-        [SerializeField] private int _materialId;
+        [SerializeField] private EntityId _materialId;
         [SerializeField] private string _propertyName = string.Empty;
         [SerializeField] private Texture2D _materialTexture;
         [SerializeField] private Texture2D _customTexture;
@@ -30,7 +30,7 @@ namespace Macaron.UVViewer.Editor.Internal
         private void OnEnable()
         {
             _sourceType = EditorPrefsExt.GetEnum(_sourceTypeKey, TextureSourceType.None);
-            _materialId = EditorPrefs.GetInt(_materialIdKey, 0);
+            _materialId = EntityId.FromULong(ulong.Parse(EditorPrefs.GetString(_materialIdKey, "0")));
             _propertyName = EditorPrefs.GetString(_propertyNameKey, string.Empty);
             _filterMode = Mathf.Clamp(EditorPrefs.GetInt(_filterModeKey, 1), 0, 1);
             _customTexture = EditorPrefsExt.GetAsset<Texture2D>(_customTextureKey);
@@ -42,7 +42,7 @@ namespace Macaron.UVViewer.Editor.Internal
         private void OnDisable()
         {
             EditorPrefsExt.SetEnum(_sourceTypeKey, _sourceType);
-            EditorPrefs.SetInt(_materialIdKey, _materialId);
+            EditorPrefs.SetString(_materialIdKey, EntityId.ToULong(_materialId).ToString());
             EditorPrefs.SetString(_propertyNameKey, _propertyName);
             EditorPrefsExt.SetAsset(_customTextureKey, _customTexture);
             EditorPrefs.SetInt(_filterModeKey, _filterMode);
@@ -70,7 +70,7 @@ namespace Macaron.UVViewer.Editor.Internal
             set { _customTexture = value; }
         }
 
-        public int MaterialId
+        public EntityId MaterialId
         {
             get { return _materialId; }
             set { _materialId = value; }
