@@ -1529,25 +1529,25 @@ namespace Macaron.UVViewer.Editor
             }
 
             string[] materialNames = materials.Select(mat => mat.name).ToArray();
-            int[] materialIds = materials.Select(mat => mat.GetEntityId().GetHashCode()).ToArray();
-            int oldMaterialId = _textureSettings.MaterialId.GetHashCode();
+            // Select by index and compare EntityIds directly; an EntityId has no int form.
+            int oldIndex = Array.FindIndex(materials, mat => mat.GetEntityId() == _textureSettings.MaterialId);
 
-            if (!materialIds.Contains(oldMaterialId))
+            if (oldIndex < 0)
             {
-                oldMaterialId = materialIds[0];
+                oldIndex = 0;
                 _textureSettings.MaterialTexture = null;
             }
 
-            int newMaterialId = EditorGUILayout.IntPopup("Material", oldMaterialId, materialNames, materialIds);
-            if (newMaterialId != oldMaterialId)
+            int newIndex = EditorGUILayout.Popup("Material", oldIndex, materialNames);
+            if (newIndex != oldIndex)
             {
                 Undo.RecordObject(_textureSettings, "Texture Settings Change");
 
-                _textureSettings.MaterialId = newMaterialId;
+                _textureSettings.MaterialId = materials[newIndex].GetEntityId();
                 _textureSettings.MaterialTexture = null;
             }
 
-            Material material = Array.Find(materials, mat => mat.GetEntityId().GetHashCode() == newMaterialId);
+            Material material = materials[newIndex];
             Shader shader = material.shader;
 
             var props = Enumerable
